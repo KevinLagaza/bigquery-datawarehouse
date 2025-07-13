@@ -13,6 +13,9 @@ from airflow.decorators import dag, task, task_group
 GCP_CONN_ID = Variable.get("GCP_CONN_ID", default_var="<default_variable_mentioned_in_airflow_connection>") # Your BigQuery Airflow connection ID
 hook_bq = BigQueryHook(gcp_conn_id=GCP_CONN_ID)
 hook_gcs = GCSHook(gcp_conn_id=GCP_CONN_ID)
+project_id='ecstatic-night-457507-v7'
+service_account = "dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"
+sql_folder = '/usr/local/airflow/sql'
 
 datasets = ['bronze', 'silver', 'gold']
 
@@ -23,7 +26,7 @@ def read_sql_file(file_path:Path):
 @dag(
         start_date=datetime(2025, 5, 8),
         schedule=None,
-        template_searchpath=['/usr/local/airflow/sql/']
+        template_searchpath=[f'{sql_folder}/']
     )
 def create_bigquery_dwh_dag():
     
@@ -38,7 +41,7 @@ def create_bigquery_dwh_dag():
                     task_id=f'create_{dataset}',
                     dataset_id=f'{dataset}',
                     location='US',
-                    project_id='ecstatic-night-457507-v7',
+                    project_id=project_id,
                     gcp_conn_id=GCP_CONN_ID,
                     exists_ok=True,  # Skip if dataset exists
                 )
@@ -58,7 +61,7 @@ def create_bigquery_dwh_dag():
             task_id=f'create_initial_tables_in_bronze',
             configuration={
                 "query": {
-                    "query": read_sql_file(Path("/usr/local/airflow/sql/bronze/ddl_bronze_table.sql")),
+                    "query": read_sql_file(Path(f"{sql_folder}/bronze/ddl_bronze_table.sql")),
                     "useLegacySql": False,
                 }
             },
@@ -70,12 +73,12 @@ def create_bigquery_dwh_dag():
             bucket='demo_etl_data_ing_roubaix',
             source_objects=['crm/cust_info.csv'],
             source_format='CSV',
-            destination_project_dataset_table="ecstatic-night-457507-v7.bronze.crm_cust_info",
-            project_id='ecstatic-night-457507-v7',
+            destination_project_dataset_table=f"{project_id}.bronze.crm_cust_info",
+            project_id=project_id,
             field_delimiter=',',
             autodetect=True,
             create_disposition='CREATE_IF_NEEDED', 
-            impersonation_chain=["dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"],
+            impersonation_chain=[f"{service_account}"],
             skip_leading_rows=1,
             write_disposition='WRITE_EMPTY',
             gcp_conn_id=GCP_CONN_ID,           
@@ -86,11 +89,11 @@ def create_bigquery_dwh_dag():
             bucket='demo_etl_data_ing_roubaix',
             source_objects=['crm/prd_info.csv'],
             source_format='CSV',
-            destination_project_dataset_table="ecstatic-night-457507-v7.bronze.crm_prd_info",
+            destination_project_dataset_table=f"{project_id}.bronze.crm_prd_info",
             field_delimiter=',',
             autodetect=True,
             create_disposition='CREATE_IF_NEEDED',
-            impersonation_chain=["dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"],
+            impersonation_chain=[f"{service_account}"],
             skip_leading_rows=1,
             write_disposition='WRITE_TRUNCATE',
             gcp_conn_id=GCP_CONN_ID,
@@ -101,11 +104,11 @@ def create_bigquery_dwh_dag():
             bucket='demo_etl_data_ing_roubaix',
             source_objects=['crm/sales_details.csv'],
             source_format='CSV',
-            destination_project_dataset_table="ecstatic-night-457507-v7.bronze.crm_sales_details",
+            destination_project_dataset_table=f"{project_id}.bronze.crm_sales_details",
             field_delimiter=',',
             autodetect=True,
             create_disposition='CREATE_IF_NEEDED',
-            impersonation_chain=["dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"],
+            impersonation_chain=[f"{service_account}"],
             skip_leading_rows=1,
             write_disposition='WRITE_TRUNCATE',
             gcp_conn_id=GCP_CONN_ID,
@@ -116,11 +119,11 @@ def create_bigquery_dwh_dag():
             bucket='demo_etl_data_ing_roubaix',
             source_objects=['erp/PX_CAT_G1V2.csv'],
             source_format='CSV',
-            destination_project_dataset_table="ecstatic-night-457507-v7.bronze.erp_px_cat_g1v2",
+            destination_project_dataset_table=f"{project_id}.bronze.erp_px_cat_g1v2",
             field_delimiter=',',
             autodetect=True,
             create_disposition='CREATE_IF_NEEDED',
-            impersonation_chain=["dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"],
+            impersonation_chain=[f"{service_account}"],
             skip_leading_rows=1,
             write_disposition='WRITE_TRUNCATE',
             gcp_conn_id=GCP_CONN_ID,
@@ -131,11 +134,11 @@ def create_bigquery_dwh_dag():
             bucket='demo_etl_data_ing_roubaix',
             source_objects=['erp/LOC_A101.csv'],
             source_format='CSV',
-            destination_project_dataset_table="ecstatic-night-457507-v7.bronze.erp_loc_a101",
+            destination_project_dataset_table=f"{project_id}-v7.bronze.erp_loc_a101",
             field_delimiter=',',
             create_disposition='CREATE_IF_NEEDED',
             allow_quoted_newlines=True,
-            impersonation_chain=["dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"],
+            impersonation_chain=[f"{service_account}"],
             skip_leading_rows=1,
             write_disposition='WRITE_TRUNCATE',
             gcp_conn_id=GCP_CONN_ID,
@@ -150,11 +153,11 @@ def create_bigquery_dwh_dag():
             bucket='demo_etl_data_ing_roubaix',
             source_objects=['erp/CUST_AZ12.csv'],
             source_format='CSV',
-            destination_project_dataset_table="ecstatic-night-457507-v7.bronze.erp_cust_az12",
+            destination_project_dataset_table=f"{project_id}.bronze.erp_cust_az12",
             field_delimiter = ',',
             autodetect=True,
             create_disposition='CREATE_IF_NEEDED',
-            impersonation_chain=["dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"],
+            impersonation_chain=["f{service_account}"],
             skip_leading_rows=1,
             write_disposition='WRITE_TRUNCATE',
             gcp_conn_id=GCP_CONN_ID,
@@ -172,7 +175,7 @@ def create_bigquery_dwh_dag():
             task_id=f'create_initial_tables_in_silver',
                 configuration={
                 "query": {
-                    "query": read_sql_file(Path("/usr/local/airflow/sql/silver/ddl_silver_table.sql")),
+                    "query": read_sql_file(Path("{sql_folder}/silver/ddl_silver_table.sql")),
                     "useLegacySql": False,
                 }
             },
@@ -183,7 +186,7 @@ def create_bigquery_dwh_dag():
             task_id=f'create_procedure_to_insert_data_in_silver',
                 configuration={
                 "query": {
-                    "query": read_sql_file(Path("/usr/local/airflow/sql/silver/dml_silver_table.sql")),
+                    "query": read_sql_file(Path(f"{sql_folder}/silver/dml_silver_table.sql")),
                     "useLegacySql": False,
                 }
             },
@@ -194,8 +197,8 @@ def create_bigquery_dwh_dag():
             task_id='run_procedure_to_insert_data_in_silver',
             configuration={
                 "query": {
-                    "query": """
-                        CALL `ecstatic-night-457507-v7.silver.load_silver`(
+                    "query": f"""
+                        CALL `{project_id}.silver.load_silver`(
                         CURRENT_DATE()  -- Airflow execution date
                         );
                     """,
@@ -216,7 +219,7 @@ def create_bigquery_dwh_dag():
             task_id=f'create_dim_tables_in_gold',
                 configuration={
                 "query": {
-                    "query": read_sql_file(Path("/usr/local/airflow/sql/gold/dml_gold_dimensions.sql")),
+                    "query": read_sql_file(Path(f"{sql_folder}/gold/dml_gold_dimensions.sql")),
                     "useLegacySql": False,
                 }
             },
@@ -227,7 +230,7 @@ def create_bigquery_dwh_dag():
             task_id=f'create_facts_tables_in_gold',
                 configuration={
                 "query": {
-                    "query": read_sql_file(Path("/usr/local/airflow/sql/gold/dml_gold_facts.sql")),
+                    "query": read_sql_file(Path(f"{sql_folder}/gold/dml_gold_facts.sql")),
                     "useLegacySql": False,
                 }
             },
