@@ -16,6 +16,7 @@ hook_gcs = GCSHook(gcp_conn_id=GCP_CONN_ID)
 project_id='ecstatic-night-457507-v7'
 service_account = "dbt-user-dev@ecstatic-night-457507-v7.iam.gserviceaccount.com"
 sql_folder = '/usr/local/airflow/sql'
+bucket_source_data='demo_etl_data_ing_roubaix'
 
 datasets = ['bronze', 'silver', 'gold']
 
@@ -70,7 +71,7 @@ def create_bigquery_dwh_dag():
 
         load_csv_into_bronze_crm_cust_info = GCSToBigQueryOperator(
             task_id='gcs_to_bigquery_bronze_crm_cust_info',
-            bucket='demo_etl_data_ing_roubaix',
+            bucket=f"{bucket_source_data}",
             source_objects=['crm/cust_info.csv'],
             source_format='CSV',
             destination_project_dataset_table=f"{project_id}.bronze.crm_cust_info",
@@ -86,7 +87,7 @@ def create_bigquery_dwh_dag():
 
         load_csv_into_bronze_crm_prd_info = GCSToBigQueryOperator(
             task_id='gcs_to_bigquery_bronze_crm_prd_info',
-            bucket='demo_etl_data_ing_roubaix',
+            bucket=f"{bucket_source_data}",
             source_objects=['crm/prd_info.csv'],
             source_format='CSV',
             destination_project_dataset_table=f"{project_id}.bronze.crm_prd_info",
@@ -101,7 +102,7 @@ def create_bigquery_dwh_dag():
 
         load_csv_into_bronze_crm_sales_details = GCSToBigQueryOperator(
             task_id='gcs_to_bigquery_bronze_crm_sales_details',
-            bucket='demo_etl_data_ing_roubaix',
+            bucket=f"{bucket_source_data}",
             source_objects=['crm/sales_details.csv'],
             source_format='CSV',
             destination_project_dataset_table=f"{project_id}.bronze.crm_sales_details",
@@ -116,7 +117,7 @@ def create_bigquery_dwh_dag():
 
         load_csv_into_bronze_erp_px_cat_g1v2 = GCSToBigQueryOperator(
             task_id='gcs_to_bigquery_bronze_erp_px_cat_g1v2',
-            bucket='demo_etl_data_ing_roubaix',
+            bucket=f"{bucket_source_data}",
             source_objects=['erp/PX_CAT_G1V2.csv'],
             source_format='CSV',
             destination_project_dataset_table=f"{project_id}.bronze.erp_px_cat_g1v2",
@@ -131,7 +132,7 @@ def create_bigquery_dwh_dag():
 
         load_csv_into_bronze_erp_loc_a101 = GCSToBigQueryOperator(
             task_id='gcs_to_bigquery_bronze_erp_loc_a101',
-            bucket='demo_etl_data_ing_roubaix',
+            bucket=f"{bucket_source_data}",
             source_objects=['erp/LOC_A101.csv'],
             source_format='CSV',
             destination_project_dataset_table=f"{project_id}-v7.bronze.erp_loc_a101",
@@ -150,7 +151,7 @@ def create_bigquery_dwh_dag():
 
         load_csv_into_bronze_erp_cust_az12 = GCSToBigQueryOperator(
             task_id='gcs_to_bigquery_bronze_erp_cust_az12',
-            bucket='demo_etl_data_ing_roubaix',
+            bucket=f"{bucket_source_data}",
             source_objects=['erp/CUST_AZ12.csv'],
             source_format='CSV',
             destination_project_dataset_table=f"{project_id}.bronze.erp_cust_az12",
